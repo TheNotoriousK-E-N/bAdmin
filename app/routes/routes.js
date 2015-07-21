@@ -1,9 +1,15 @@
-//  /app/routes/routes.js
-//  
-module.exports = function(app){
+var config = require('../../config');
+var superSecret = config.secret;
 
-	// default '/' route
-	app.get('/', function(req, res){
-		res.send('Hey! This is the home page for now!');
-	})
+module.exports = function(app, express){
+	var router = express.Router();
+
+	router.get('/', function(req, res){
+		res.send('Welcome to the index.');
+	});
+	return router;
 }
+
+
+
+
