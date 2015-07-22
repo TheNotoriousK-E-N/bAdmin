@@ -4,24 +4,19 @@ var User = require('../models/model_users')
 var jwt = require('jsonwebtoken');
 
 module.exports = function(app, express){
-	app.get('/', function(req, res){ 			// base URL for homepage
-		res.send('Welcome To The Index.');
-	});
-
-	app.get
+	var adminRoutes = express.Router();
 
 	
 	//==========================
-	// API Routes
+	// Admin Routes
 	//==========================
-	var adminRoutes = express.Router();
-
+	
 	adminRoutes.post('/authenticate', function(req, res) {
 		// find the user
 		// select the username and password explicitly
 		User.findOne({
 			userName: req.body.userName
-		}).select('firstName lastName userName password').exec(function(err, user) {
+		}).select('password').exec(function(err, user) {
 			if(err) {
 				throw err;
 			}
@@ -41,14 +36,9 @@ module.exports = function(app, express){
 				}
 				else {                     // User and Password are good
 					// Create a token
-					var token = jwt.sign({
-						firstName: user.firstName,
-						lastName: user.lastName,
-						userName: user.userName,
-						isAdmin: user.isAdmin
-					}, superSecret, {
-						expiresInMinutes: 1440 // 24-Hours
-					});
+					var token = jwt.sign(user, superSecret, {
+						expiresInMinutes: 1440 // 24 Hours
+					})
 
 					// return info (with token) as JSON
 					res.json({
@@ -62,18 +52,19 @@ module.exports = function(app, express){
 	});
 
 	// Routes
+	// Middleware to verify the token
 	adminRoutes.use(function(req, res, next) {
-		// verify tokens
+		// logging
+		console.log('App has been accessed');
+		// check Header/URL Params/Post Params for token
 		var token = req.body.token || req.query.token || req.headers['x-access-token'];
+		
 		// decode the token
 		if(token) {
 			// verifies && checks expiration
 			jwt.verify(token, superSecret, function(err, decoded){
-				if(err) {
-					return res.status(403).send({
-						success: false,
-						message: 'Token authentication failed.'
-					});
+				if(err){
+					return res.json({ success: false, message: 'Failed to authenticate token.'});
 				}
 				else {
 					// everything matches up save to request for further use
@@ -93,9 +84,11 @@ module.exports = function(app, express){
 		}
 	});
 
-	adminRoutes.get('/', function(req, res){
-		res.json({ message: 'My Grandma was half Nintendo, dowg.' });
+	/*
+	app.get('/', function(req, res){ 			// base URL for homepage
+		res.send('Welcome To The Index.');
 	});
+	*/
 
 	adminRoutes.route('/users')
 		// create a user
@@ -199,12 +192,8 @@ module.exports = function(app, express){
 				}
 			})
 		});
-	// the '/me' route - displays user information	
-	adminRoutes.get('/me', function(req, res){
-		res.send(req.decoded);
-	});
 	return adminRoutes;
-}
+};
 
 
 
