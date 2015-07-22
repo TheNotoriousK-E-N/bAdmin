@@ -41,10 +41,16 @@ app.use(function(req, res, next){
 app.use(morgan('dev'));
 
 //===================
+// Authentication
+//===================
+var jwt = require('jsonwebtoken');
+var superSecret = config.secret;
+
+//===================
 // Routing
 //===================
-var apiRoutes = require('./app/routes/routes')(app, express);
-app.use('/api', apiRoutes);
+var adminRoutes = require('./app/routes/routes')(app, express);
+app.use('/admin', adminRoutes);
 
 
 //===================
