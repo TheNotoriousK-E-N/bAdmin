@@ -44,7 +44,8 @@ module.exports = function(app, express){
 					var token = jwt.sign({
 						firstName: user.firstName,
 						lastName: user.lastName,
-						userName: user.userName
+						userName: user.userName,
+						isAdmin: user.isAdmin
 					}, superSecret, {
 						expiresInMinutes: 1440 // 24-Hours
 					});
@@ -62,9 +63,34 @@ module.exports = function(app, express){
 
 	// Routes
 	adminRoutes.use(function(req, res, next) {
-		// log!
-		console.log('Somebody all up in our app!');
-		next();
+		// verify tokens
+		var token = req.body.token || req.query.token || req.headers['x-access-token'];
+		// decode the token
+		if(token) {
+			// verifies && checks expiration
+			jwt.verify(token, superSecret, function(err, decoded){
+				if(err) {
+					return res.status(403).send({
+						success: false,
+						message: 'Token authentication failed.'
+					});
+				}
+				else {
+					// everything matches up save to request for further use
+					req.decoded = decoded;
+
+					next();
+				}
+			});
+		}
+		else {
+			// there is no token
+			// return an HTTP 403 (Forbidden) response and an error message
+			return res.status(403).send({
+				success: false,
+				message: 'No Token Provided'
+			});
+		}
 	});
 
 	adminRoutes.get('/', function(req, res){
@@ -172,8 +198,11 @@ module.exports = function(app, express){
 					res.json({ message: 'User has been succesfully deleted.' })
 				}
 			})
-		})
-
+		});
+	// the '/me' route - displays user information	
+	adminRoutes.get('/me', function(req, res){
+		res.send(req.decoded);
+	});
 	return adminRoutes;
 }
 
