@@ -16,14 +16,16 @@ var UserSchema = new Schema({
 	userName: {
 		type: String,
 		required: true,
-		index: {
-			unique: true
-		}
+		unique: true	
 	},
 	password: {
 		type: String,
 		required: true,
 		select: false
+	},
+	isAdmin: {
+		type: Boolean,
+		required: true
 	}
 });
 
