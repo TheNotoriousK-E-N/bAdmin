@@ -23,7 +23,7 @@ module.exports = function(app, express){
 	});
 
 	apiRoutes.get('/', function(req, res){
-		res.json({ message: 'Check out this A P I !!!11!!' });
+		res.json({ message: 'My Grandma was half Nintendo, dowg.' });
 	});
 
 	apiRoutes.route('/users')
@@ -65,6 +65,65 @@ module.exports = function(app, express){
 				}
 			});
 		});
+
+		// retrieve a single user by _id
+	apiRoutes.route('/users/:user_id')
+		.get(function(req, res){
+			User.findById(req.params.user_id, function(err, user){
+				if(err) {
+					res.send(err);
+				}
+				else { 
+					res.json(user);
+				}
+			});
+		})
+
+		// update a single user
+		.put(function(req, res){
+			User.findById(req.params.user_id, function(err, user){
+				if(err) {
+					res.send(err);
+				}
+				else {
+					// only update info if new / changed
+					if(req.body.firstName) {
+						user.firstName = req.body.firstName;
+					}
+					if(req.body.lastName) {
+						user.lastName = req.body.lastName;
+					}
+					if(req.body.userName) {
+						user.userName = req.body.userName;
+					}
+					if(req.body.password) {
+						user.password = req.body.password;
+					}
+					// save the updated user
+					user.save(function(err) {
+						if(err) {
+							res.send(err);
+						}
+						else {
+							res.json({ message: user.userName + " updated!" });
+						}
+					});
+				}
+			});
+		})
+		// add the 'DELETE' route
+		.delete(function(req, res){
+			User.remove({
+				_id: req.params.user_id
+			}, function(err, user){
+				if(err){
+					return re.send(err);
+				}
+				else {
+					res.json({ message: 'User has been succesfully deleted.' })
+				}
+			})
+		})
 
 	return apiRoutes;
 }
