@@ -192,6 +192,10 @@ module.exports = function(app, express){
 				}
 			})
 		});
+	adminRoutes.get('/admin/me', function(req, res) {
+		res.send(req.decoded);
+	});
+	
 	return adminRoutes;
 };
 

@@ -44,6 +44,8 @@ app.use(morgan('dev'));
 //===================
 // Routing
 //===================
+//
+app.use(express.static(__dirname + '/public'));
 var adminRoutes = require('./app/routes/routes')(app, express);
 app.use('/admin', adminRoutes);
 
@@ -51,14 +53,14 @@ app.use('/admin', adminRoutes);
 // must be registered **AFTER** API routes
 app.get('*', function(req, res){
 	var options = {
-		root: __dirname + '/public/assets/views/',
+		root: __dirname + '/public/assets/',
 		dotfiles: 'allow',
 		headers: {
 			'x-timestamp': Date.now(),
 			'x-sent': true
 		}
 	};
-	var filename = 'index.html';
+	var filename = 'views/index.html';
 	res.sendFile(filename, options, function(err){
 		if(err){
 			console.log(err);
